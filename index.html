@@ -160,18 +160,20 @@ function rename(){
 }
 function exportR(){
  const txt=JSON.stringify({ritmo:1,name:S.name,active:S.active,labels:S.labels,days:S.days});
- sheet(`<div class="n" style="font-size:20px">Exportar "${esc(S.name)}"</div><label>Código de la rutina: cópialo y envíalo, o guarda el archivo</label><textarea id="tx" readonly>${esc(txt)}</textarea>
- <div class="row" style="margin-top:12px"><button class="btn" id="cp">Copiar</button><button class="btn g" id="sv">Guardar archivo</button><button class="btn l" id="cl">Cerrar</button></div>`);
+ sheet(`<div class="n" style="font-size:20px">Exportar "${esc(S.name)}"</div><label>Código de la rutina: cópialo y envíalo, o guarda el archivo</label><textarea id="tx" readonly>${esc(txt)}</textarea><div class="m" id="msg" style="margin-top:8px"></div>
+ <div class="row" style="margin-top:12px"><button class="btn" id="cp">Copiar</button><button class="btn g" id="sv">Compartir / guardar archivo</button><button class="btn l" id="cl">Cerrar</button></div>`);
  $('#cp').onclick=async()=>{try{await navigator.clipboard.writeText(txt);$('#cp').textContent='¡Copiado!'}catch{$('#tx').select();$('#cp').textContent='Copia lo seleccionado'}};
- $('#sv').onclick=()=>{const f=new File([txt],S.name.replace(/[^\w-]+/g,'_')+'.ritmo.json',{type:'application/json'});
-  if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],title:S.name}).catch(()=>{});
-  else{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click()}};
+ $('#sv').onclick=async()=>{
+  const f=new File([txt],(S.name.replace(/[^\w-]+/g,'_')||'rutina')+'.txt',{type:'text/plain'}),m=$('#msg');
+  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:S.name});m.textContent='Listo. Elige dónde guardar el archivo.';return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();m.textContent='Se intentó guardar el archivo. Si no aparece en Descargas, usa Copiar.'}catch{m.textContent='No se pudo crear el archivo en este dispositivo. Usa Copiar.'}
+ };
  $('#cl').onclick=close;
 }
 function importR(){
- sheet(`<div class="n" style="font-size:20px">Importar rutina</div><label>Pega el código de la rutina o elige un archivo</label><textarea id="tx"></textarea><input id="fl" type="file" accept=".json,application/json" style="margin-top:10px"><div class="m" id="er" style="color:#d64a1c;margin-top:6px"></div>
+ sheet(`<div class="n" style="font-size:20px">Importar rutina</div><label>Pega el código de la rutina o elige un archivo</label><textarea id="tx"></textarea><input id="fl" type="file" style="margin-top:10px"><div class="m" id="er" style="color:#d64a1c;margin-top:6px"></div>
  <div class="row" style="margin-top:12px"><button class="btn" id="ok">Importar</button><button class="btn l" id="cl">Cancelar</button></div>`);
- const go=t=>{try{const o=JSON.parse(t);if(o.ritmo!==1)throw 0;const b=clean(o);R.list.push(b);use(b.id)}catch{$('#er').textContent='No pude leer eso. Revisa que sea una rutina de Ritmo.'}};
+ const go=t=>{try{const o=JSON.parse(String(t).replace(/^\uFEFF/,'').trim());if(o.ritmo!==1)throw 0;const b=clean(o);R.list.push(b);use(b.id)}catch{$('#er').textContent='No pude leer eso. Revisa que sea una rutina de Ritmo.'}};
  $('#fl').onchange=e=>{const f=e.target.files[0];if(f)f.text().then(go)};
  $('#ok').onclick=()=>go($('#tx').value);$('#cl').onclick=close;
 }
