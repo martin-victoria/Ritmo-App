@@ -3,17 +3,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ritmo</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#f5f5f2">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Ritmo">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
-:root{--bg:#f5f5f2;--paper:#fff;--ink:#20231f;--muted:#777d75;--line:#e7e9e3;--green:#c9f36a;--on:#26382b;--soft:#eef9d4;--orange:#fb8b5b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141713;--paper:#1e221d;--ink:#eef1ea;--muted:#98a095;--line:#2c312a;--soft:#2a3320}}
-:root[data-theme="dark"]{--bg:#141713;--paper:#1e221d;--ink:#eef1ea;--muted:#98a095;--line:#2c312a;--soft:#2a3320}
+:root{color-scheme:dark;--bg:#0a0a0a;--paper:#151515;--ink:#f2f2f2;--muted:#8c8c8c;--line:#2a2a2a;--green:#f2f2f2;--on:#0a0a0a;--soft:#1d1d1d;--orange:#fb8b5b;--ok:#7bc043;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 'DM Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
@@ -23,17 +21,17 @@ h1{margin:0;font-size:28px;letter-spacing:-.5px}.top{display:flex;justify-conten
 .pill{background:var(--green);color:var(--on);font-weight:700;border-radius:99px;padding:5px 12px;font-size:13px}
 .tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
 .tab{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:9px 0;font-weight:500;position:relative}
-.tab.on{background:var(--on);color:#fff;border-color:var(--on)}.tab.ok::after{content:"";position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:#7bc043}
+.tab.on{background:var(--green);color:var(--on);border-color:var(--green)}.tab.ok::after{content:"";position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--ok)}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
 .timer .t{font-size:44px;font-weight:700;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{justify-content:space-between}
 .chip{border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;background:var(--bg)}.chip.on{background:var(--green);color:var(--on);border-color:var(--green);font-weight:700}
-.btn{background:var(--on);color:#fff;border-radius:14px;padding:11px 18px;font-weight:700}.btn.g{background:var(--green);color:var(--on)}.btn.l{background:var(--bg);color:var(--ink);border:1px solid var(--line)}.btn.r{color:#d64a1c;background:var(--bg);border:1px solid var(--line)}
+.btn{background:#2a2a2a;color:#fff;border-radius:14px;padding:11px 18px;font-weight:700}.btn.g{background:var(--green);color:var(--on)}.btn.l{background:var(--bg);color:var(--ink);border:1px solid var(--line)}.btn.r{color:#d64a1c;background:var(--bg);border:1px solid var(--line)}
 .ex{display:flex;gap:12px;align-items:center;cursor:pointer}.ex.done{background:var(--soft)}.ex.done .n{text-decoration:line-through;color:var(--muted)}
-.ck{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;color:transparent}.done .ck{background:#7bc043;border-color:#7bc043;color:#fff}
+.ck{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;color:transparent}.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
 .n{font-weight:700}.m{color:var(--muted);font-size:13px}.tag{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:1px 8px;margin:4px 4px 0 0;font-size:12px}
 .empty{text-align:center;color:var(--muted);padding:26px 10px}
-.banner{background:var(--green);color:var(--on);border-radius:18px;padding:16px;margin-bottom:10px;text-align:center;font-weight:700}
+.banner{background:var(--ok);color:#0a0a0a;border-radius:18px;padding:16px;margin-bottom:10px;text-align:center;font-weight:700}
 .back{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;justify-content:center;z-index:5}.back.on{display:flex}
 .sheet{background:var(--paper);width:100%;max-width:520px;max-height:92%;overflow:auto;border-radius:24px 24px 0 0;padding:18px 16px calc(22px + env(safe-area-inset-bottom,0px))}
 label{display:block;font-size:12px;color:var(--muted);margin:12px 0 4px}
@@ -98,7 +96,7 @@ function render(){
  <div class="row" style="margin-top:12px"><button class="chip ${T.mode==='time'?'on':''}" data-m="time">Ejercicio</button><button class="chip ${T.mode==='rest'?'on':''}" data-m="rest">Descanso</button><span class="m">|</span>${PRE[T.mode].map(p=>`<button class="chip ${T.total===p[1]?'on':''}" data-s="${p[1]}">${p[0]}</button>`).join('')}<button class="chip" id="trs">↺</button></div></div>
  ${list.length?list.map(e=>`<div class="card ex ${S.done[e.id]?'done':''}" data-e="${e.id}"><button class="ck" data-c="${e.id}" aria-label="Terminado">✓</button><div style="flex:1;min-width:0"><div class="n">${esc(e.name)}</div><div class="m">${spec(e)}</div>${e.weight?`<span class="tag">⚖ ${esc(e.weight)}</span>`:''}${e.intensity?`<span class="tag">🔥 ${esc(e.intensity)}</span>`:''}</div></div>`).join(''):'<div class="empty">Sin ejercicios en este día.<br>Agrega el primero.</div>'}
  <button class="btn l fab" id="add">+ Agregar ejercicio</button>
- <button class="btn l fab" id="md" style="margin-top:8px">${S.mark[k]?'Quitar marca de día completo':auto(k)?'✓ Día completo':'Marcar día como completo'}</button>`;
+ <button class="btn l fab" id="md" style="margin-top:8px${isDone(k)?';color:var(--ok);border-color:var(--ok)':''}">${S.mark[k]?'Quitar marca de día completo':auto(k)?'✓ Día completo':'Marcar día como completo'}</button>`;
  $('#tgo').onclick=toggleTimer;$('#trs').onclick=()=>setTimer(T.total);
 }
 document.addEventListener('click',ev=>{
