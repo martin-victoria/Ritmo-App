@@ -40,7 +40,7 @@ input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius
 form[data-m=time] .sr,form[data-m=sets] .tm{display:none}
 .sug{display:flex;flex-direction:column;gap:6px;margin-top:8px}.sug button{text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .fab{width:100%;margin-top:4px}
-.sub{padding:0;color:var(--muted);text-align:left;font-size:13px;margin-top:2px}.pill{font-size:13px}.h1{padding:0;font-size:26px;font-weight:700;letter-spacing:-.5px;text-align:left}textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:90px;font:inherit;color:inherit}</style></head><body><div class="wrap" id="app"></div><div class="back" id="back"><div class="sheet" id="sheet"></div></div>
+.sub{padding:0;color:var(--muted);text-align:left;font-size:13px;margin-top:2px}.pill{font-size:13px}.h1{padding:0;font-size:26px;font-weight:700;letter-spacing:-.5px;text-align:left}textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:90px;font:inherit;color:inherit}.timer{padding:12px}.timer .t{font-size:40px}.pr{display:flex;gap:5px;margin-top:8px}.pr .chip{flex:1;min-width:0;padding:7px 0;text-align:center;white-space:nowrap;font-size:13px}</style></head><body><div class="wrap" id="app"></div><div class="back" id="back"><div class="sheet" id="sheet"></div></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const DAYS=[['mon','Lun','Lunes'],['tue','Mar','Martes'],['wed','Mié','Miércoles'],['thu','Jue','Jueves'],['fri','Vie','Viernes'],['sat','Sáb','Sábado'],['sun','Dom','Domingo']];
@@ -72,7 +72,7 @@ function advance(){S.streak=act().some(d=>isDone(d[0]))?S.streak+1:0;S.week++;S.
 
 /* contador */
 let T={mode:'time',total:420,left:420,end:0,run:false,iv:0},AC;
-const PRE={time:[1,2,3,4,5,10].map(m=>[m+' min',m*60]),rest:[['30 s',30],['60 s',60],['90 s',90],['2 min',120],['2:30',150],['3 min',180]]};
+const PRE={time:[1,2,3,4,5].map(m=>[m+' min',m*60]),rest:[['30 s',30],['60 s',60],['90 s',90],['2 min',120],['2:30',150],['3 min',180]]};
 const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 function beep(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=880;g.gain.value=.25;o.connect(g);g.connect(AC.destination);o.start(AC.currentTime+t);o.stop(AC.currentTime+t+.2)})}catch{}try{navigator.vibrate&&navigator.vibrate([300,150,300,150,300])}catch{}}
 function tick(){T.left=Math.max(0,Math.round((T.end-Date.now())/1000));if(T.left<=0&&T.run){clearInterval(T.iv);T.run=false;unwake();saveT();beep()}paintTimer()}
@@ -95,9 +95,9 @@ function render(){
  <div class="tabs" style="grid-template-columns:repeat(${A.length||1},1fr)">${A.map(d=>`<button class="tab ${d[0]===k?'on':''} ${isDone(d[0])?'ok':''}" data-d="${d[0]}">${d[1]}</button>`).join('')}</div>
  ${weekOk?`<div class="banner">¡Semana ${S.week} completada! 🎉<br><button class="btn" id="nw" style="margin-top:10px">Empezar semana ${S.week+1}</button></div>`:''}
  <div class="card timer"><div class="row sp"><button class="t" id="tt" aria-label="Editar tiempo">${fmt(T.left)}</button><button class="btn g" id="tgo">${T.run?'Pausar':T.left<=0?'Reiniciar':'Iniciar'}</button></div>
- <div class="row" style="margin-top:12px"><button class="chip ${T.mode==='time'?'on':''}" data-m="time">Ejercicio</button><button class="chip ${T.mode==='rest'?'on':''}" data-m="rest">Descanso</button></div>
- <div class="row" style="margin-top:8px">${PRE[T.mode].map(p=>`<button class="chip ${T.total===p[1]?'on':''}" data-s="${p[1]}">${p[0]}</button>`).join('')}</div>
- <div class="row" style="margin-top:8px"><button class="chip" id="tp30">+30 s</button><button class="chip" id="tp1">+1 min</button><button class="chip" id="ted">✎ Editar</button><button class="chip" id="trs">↺</button></div></div>
+ <div class="pr" style="margin-top:10px"><button class="chip ${T.mode==='time'?'on':''}" data-m="time">Ejercicio</button><button class="chip ${T.mode==='rest'?'on':''}" data-m="rest">Descanso</button></div>
+ <div class="pr">${PRE[T.mode].map(p=>`<button class="chip ${T.total===p[1]?'on':''}" data-s="${p[1]}">${p[0]}</button>`).join('')}</div>
+ <div class="pr"><button class="chip" id="tp30">+30 s</button><button class="chip" id="tp1">+1 min</button><button class="chip" id="ted">✎ Editar</button><button class="chip" id="trs">↺</button></div></div>
  ${list.length?list.map(e=>`<div class="card ex ${S.done[e.id]?'done':''}" data-e="${e.id}"><button class="ck" data-c="${e.id}" aria-label="Terminado">✓</button><div style="flex:1;min-width:0"><div class="n">${esc(e.name)}</div><div class="m">${spec(e)}</div>${e.weight?`<span class="tag">⚖ ${esc(e.weight)}</span>`:''}${e.intensity?`<span class="tag">🔥 ${esc(e.intensity)}</span>`:''}</div></div>`).join(''):'<div class="empty">Sin ejercicios en este día.<br>Agrega el primero.</div>'}
  <button class="btn l fab" id="add">+ Agregar ejercicio</button>
  <button class="btn l fab" id="md" style="margin-top:8px${isDone(k)?';color:var(--ok);border-color:var(--ok)':''}">${S.mark[k]?'Quitar marca de día completo':auto(k)?'✓ Día completo':'Marcar día como completo'}</button>`;
