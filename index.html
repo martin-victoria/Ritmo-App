@@ -23,7 +23,7 @@ h1{margin:0;font-size:28px;letter-spacing:-.5px}.top{display:flex;justify-conten
 .tab{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:9px 0;font-weight:500;position:relative}
 .tab.on{background:var(--green);color:var(--on);border-color:var(--green)}.tab.ok::after{content:"";position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--ok)}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
-.timer .t{font-size:44px;font-weight:700;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1}
+.timer .t{padding:0;text-align:left;font-size:44px;font-weight:700;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{justify-content:space-between}
 .chip{border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;background:var(--bg)}.chip.on{background:var(--green);color:var(--on);border-color:var(--green);font-weight:700}
 .btn{background:#2a2a2a;color:#fff;border-radius:14px;padding:11px 18px;font-weight:700}.btn.g{background:var(--green);color:var(--on)}.btn.l{background:var(--bg);color:var(--ink);border:1px solid var(--line)}.btn.r{color:#d64a1c;background:var(--bg);border:1px solid var(--line)}
@@ -72,12 +72,14 @@ function advance(){S.streak=act().some(d=>isDone(d[0]))?S.streak+1:0;S.week++;S.
 
 /* contador */
 let T={mode:'time',total:420,left:420,end:0,run:false,iv:0},AC;
-const PRE={time:[6,7,15,20].map(m=>[m+' min',m*60]),rest:[30,60,90,120].map(s=>[s+' s',s])};
+const PRE={time:[1,2,3,4,5,10].map(m=>[m+' min',m*60]),rest:[['30 s',30],['60 s',60],['90 s',90],['2 min',120],['2:30',150],['3 min',180]]};
 const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 function beep(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=880;g.gain.value=.25;o.connect(g);g.connect(AC.destination);o.start(AC.currentTime+t);o.stop(AC.currentTime+t+.2)})}catch{}try{navigator.vibrate&&navigator.vibrate([300,150,300,150,300])}catch{}}
 function tick(){T.left=Math.max(0,Math.round((T.end-Date.now())/1000));if(T.left<=0&&T.run){clearInterval(T.iv);T.run=false;unwake();saveT();beep()}paintTimer()}
 function setTimer(sec,mode){clearInterval(T.iv);unwake();T={...T,mode:mode||T.mode,total:sec,left:sec,run:false};saveT();render()}
 function toggleTimer(){if(T.run){clearInterval(T.iv);T.run=false;unwake()}else{if(T.left<=0)T.left=T.total;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)()}catch{}T.end=Date.now()+T.left*1000;T.run=true;T.iv=setInterval(tick,250);wake()}saveT();paintTimer()}
+function addT(sec){T.left=Math.max(1,T.left+sec);if(T.run)T.end+=sec*1000;saveT();paintTimer()}
+function adjust(sec){T.total=sec;T.left=sec;if(T.run)T.end=Date.now()+sec*1000;saveT();render()}
 function paintTimer(){const t=$('#tt');if(!t)return;t.textContent=fmt(T.left);$('#tgo').textContent=T.run?'Pausar':(T.left<=0?'Reiniciar':'Iniciar')}
 
 function saveT(){try{localStorage.setItem('ritmo-timer',JSON.stringify({mode:T.mode,total:T.total,left:T.left,end:T.end,run:T.run}))}catch{}}
@@ -92,8 +94,10 @@ function render(){
  $('#app').innerHTML=`<div class="top"><div><button class="h1" id="rt">${esc(S.name)} ▾</button><button class="sub" id="lb">${[dn,S.labels[k],'diario de entrenamiento'].filter(Boolean).map(esc).join(' - ')} ✎</button></div><div class="row" style="gap:6px">${S.streak>0?`<span class="pill" style="background:var(--orange);color:#fff">🔥 ${S.streak}</span>`:''}<button class="pill" id="wk">Semana ${S.week} · ${n}/${A.length}</button></div></div>
  <div class="tabs" style="grid-template-columns:repeat(${A.length||1},1fr)">${A.map(d=>`<button class="tab ${d[0]===k?'on':''} ${isDone(d[0])?'ok':''}" data-d="${d[0]}">${d[1]}</button>`).join('')}</div>
  ${weekOk?`<div class="banner">¡Semana ${S.week} completada! 🎉<br><button class="btn" id="nw" style="margin-top:10px">Empezar semana ${S.week+1}</button></div>`:''}
- <div class="card timer"><div class="row sp"><div class="t" id="tt">${fmt(T.left)}</div><button class="btn g" id="tgo">${T.run?'Pausar':T.left<=0?'Reiniciar':'Iniciar'}</button></div>
- <div class="row" style="margin-top:12px"><button class="chip ${T.mode==='time'?'on':''}" data-m="time">Ejercicio</button><button class="chip ${T.mode==='rest'?'on':''}" data-m="rest">Descanso</button><span class="m">|</span>${PRE[T.mode].map(p=>`<button class="chip ${T.total===p[1]?'on':''}" data-s="${p[1]}">${p[0]}</button>`).join('')}<button class="chip" id="trs">↺</button></div></div>
+ <div class="card timer"><div class="row sp"><button class="t" id="tt" aria-label="Editar tiempo">${fmt(T.left)}</button><button class="btn g" id="tgo">${T.run?'Pausar':T.left<=0?'Reiniciar':'Iniciar'}</button></div>
+ <div class="row" style="margin-top:12px"><button class="chip ${T.mode==='time'?'on':''}" data-m="time">Ejercicio</button><button class="chip ${T.mode==='rest'?'on':''}" data-m="rest">Descanso</button></div>
+ <div class="row" style="margin-top:8px">${PRE[T.mode].map(p=>`<button class="chip ${T.total===p[1]?'on':''}" data-s="${p[1]}">${p[0]}</button>`).join('')}</div>
+ <div class="row" style="margin-top:8px"><button class="chip" id="tp30">+30 s</button><button class="chip" id="tp1">+1 min</button><button class="chip" id="ted">✎ Editar</button><button class="chip" id="trs">↺</button></div></div>
  ${list.length?list.map(e=>`<div class="card ex ${S.done[e.id]?'done':''}" data-e="${e.id}"><button class="ck" data-c="${e.id}" aria-label="Terminado">✓</button><div style="flex:1;min-width:0"><div class="n">${esc(e.name)}</div><div class="m">${spec(e)}</div>${e.weight?`<span class="tag">⚖ ${esc(e.weight)}</span>`:''}${e.intensity?`<span class="tag">🔥 ${esc(e.intensity)}</span>`:''}</div></div>`).join(''):'<div class="empty">Sin ejercicios en este día.<br>Agrega el primero.</div>'}
  <button class="btn l fab" id="add">+ Agregar ejercicio</button>
  <button class="btn l fab" id="md" style="margin-top:8px${isDone(k)?';color:var(--ok);border-color:var(--ok)':''}">${S.mark[k]?'Quitar marca de día completo':auto(k)?'✓ Día completo':'Marcar día como completo'}</button>`;
@@ -102,9 +106,12 @@ function render(){
 document.addEventListener('click',ev=>{
  const t=ev.target.closest('button,.ex');if(!t||t.closest('#sheet'))return;
  if(t.dataset.d){S.day=t.dataset.d;save();render()}
- else if(t.dataset.m){setTimer(PRE[t.dataset.m][1][1],t.dataset.m)}
+ else if(t.dataset.m){setTimer(t.dataset.m==='time'?300:60,t.dataset.m)}
  else if(t.dataset.s){setTimer(+t.dataset.s)}
  else if(t.dataset.c){S.done[t.dataset.c]=!S.done[t.dataset.c];save();render()}
+ else if(t.id==='tt'||t.id==='ted')timeSheet();
+ else if(t.id==='tp30')addT(30);
+ else if(t.id==='tp1')addT(60);
  else if(t.id==='nw'){advance();render()}
  else if(t.id==='md'){if(S.mark[S.day])delete S.mark[S.day];else if(!auto(S.day))S.mark[S.day]=true;save();render()}
  else if(t.id==='rt')routines();
@@ -176,6 +183,12 @@ function importR(){
  const go=t=>{try{const o=JSON.parse(String(t).replace(/^\uFEFF/,'').trim());if(o.ritmo!==1)throw 0;const b=clean(o);R.list.push(b);use(b.id)}catch{$('#er').textContent='No pude leer eso. Revisa que sea una rutina de Ritmo.'}};
  $('#fl').onchange=e=>{const f=e.target.files[0];if(f)f.text().then(go)};
  $('#ok').onclick=()=>go($('#tx').value);$('#cl').onclick=close;
+}
+function timeSheet(){
+ sheet(`<div class="n" style="font-size:20px">Ajustar tiempo</div><div class="m">Pon el tiempo que necesitas. Si el contador está corriendo, sigue desde ese tiempo.</div>
+ <div class="g2"><div><label>Minutos</label><input id="tm" type="number" inputmode="numeric" min="0" max="180" value="${Math.floor(T.left/60)}"></div><div><label>Segundos</label><input id="ts" type="number" inputmode="numeric" min="0" max="59" value="${T.left%60}"></div></div>
+ <div class="row" style="margin-top:14px"><button class="btn" id="ok">Usar este tiempo</button><button class="btn l" id="cl">Cancelar</button></div>`);
+ $('#ok').onclick=()=>{adjust(Math.max(1,Math.min(10800,(+$('#tm').value||0)*60+(+$('#ts').value||0))));close()};$('#cl').onclick=close;
 }
 function show(id){
  const e=S.days[S.day].find(x=>x.id===id);if(!e)return;
