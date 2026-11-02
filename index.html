@@ -71,21 +71,21 @@ const vid=e=>link(e.link)||'https://www.youtube.com/results?search_query='+encod
 function advance(){S.streak=act().some(d=>isDone(d[0]))?S.streak+1:0;S.week++;S.done={};S.mark={};save()}
 
 /* contador */
-let T={mode:'time',total:420,left:420,end:0,run:false,iv:0},AC;
+let T={mode:'time',total:300,left:300,end:0,run:false,iv:0,pref:{time:300,rest:60}},AC;
 const PRE={time:[1,2,3,4,5].map(m=>[m+' min',m*60]),rest:[['30 s',30],['60 s',60],['90 s',90],['2 min',120],['2:30',150],['3 min',180]]};
 const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 function beep(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=880;g.gain.value=.25;o.connect(g);g.connect(AC.destination);o.start(AC.currentTime+t);o.stop(AC.currentTime+t+.2)})}catch{}try{navigator.vibrate&&navigator.vibrate([300,150,300,150,300])}catch{}}
 function tick(){T.left=Math.max(0,Math.round((T.end-Date.now())/1000));if(T.left<=0&&T.run){clearInterval(T.iv);T.run=false;unwake();saveT();beep()}paintTimer()}
-function setTimer(sec,mode){clearInterval(T.iv);unwake();T={...T,mode:mode||T.mode,total:sec,left:sec,run:false};saveT();render()}
+function setTimer(sec,mode){clearInterval(T.iv);unwake();T={...T,mode:mode||T.mode,total:sec,left:sec,run:false};T.pref[T.mode]=sec;saveT();render()}
 function toggleTimer(){if(T.run){clearInterval(T.iv);T.run=false;unwake()}else{if(T.left<=0)T.left=T.total;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)()}catch{}T.end=Date.now()+T.left*1000;T.run=true;T.iv=setInterval(tick,250);wake()}saveT();paintTimer()}
 function addT(sec){T.left=Math.max(1,T.left+sec);if(T.run)T.end+=sec*1000;saveT();paintTimer()}
-function adjust(sec){T.total=sec;T.left=sec;if(T.run)T.end=Date.now()+sec*1000;saveT();render()}
+function adjust(sec){T.total=sec;T.pref[T.mode]=sec;T.left=sec;if(T.run)T.end=Date.now()+sec*1000;saveT();render()}
 function paintTimer(){const t=$('#tt');if(!t)return;t.textContent=fmt(T.left);$('#tgo').textContent=T.run?'Pausar':(T.left<=0?'Reiniciar':'Iniciar')}
 
-function saveT(){try{localStorage.setItem('ritmo-timer',JSON.stringify({mode:T.mode,total:T.total,left:T.left,end:T.end,run:T.run}))}catch{}}
+function saveT(){try{localStorage.setItem('ritmo-timer',JSON.stringify({mode:T.mode,total:T.total,left:T.left,end:T.end,run:T.run,pref:T.pref}))}catch{}}
 let WL;async function wake(){try{if(T.run&&!WL&&navigator.wakeLock){WL=await navigator.wakeLock.request('screen');WL.addEventListener('release',()=>{WL=null})}}catch{}}
 function unwake(){try{WL&&WL.release()}catch{}WL=null}
-try{const r=JSON.parse(localStorage.getItem('ritmo-timer'));if(r&&PRE[r.mode]){T.mode=r.mode;T.total=r.total;T.left=r.left;if(r.run){const l=Math.round((r.end-Date.now())/1000);if(l>0){T.end=r.end;T.left=l;T.run=true;T.iv=setInterval(tick,250);wake()}else if(l>-120){T.left=0;beep()}else T.left=T.total}}}catch{}
+try{const r=JSON.parse(localStorage.getItem('ritmo-timer'));if(r&&PRE[r.mode]){T.mode=r.mode;T.total=r.total;T.left=r.left;if(r.pref)T.pref={time:+r.pref.time||300,rest:+r.pref.rest||60};T.pref[T.mode]=T.total;if(r.run){const l=Math.round((r.end-Date.now())/1000);if(l>0){T.end=r.end;T.left=l;T.run=true;T.iv=setInterval(tick,250);wake()}else if(l>-120){T.left=0;beep()}else T.left=T.total}}}catch{}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;try{AC&&AC.state!=='running'&&AC.resume()}catch{}if(T.run){tick();wake()}});
 
 /* vista principal */
@@ -106,7 +106,7 @@ function render(){
 document.addEventListener('click',ev=>{
  const t=ev.target.closest('button,.ex');if(!t||t.closest('#sheet'))return;
  if(t.dataset.d){S.day=t.dataset.d;save();render()}
- else if(t.dataset.m){setTimer(t.dataset.m==='time'?300:60,t.dataset.m)}
+ else if(t.dataset.m){setTimer(T.pref[t.dataset.m],t.dataset.m)}
  else if(t.dataset.s){setTimer(+t.dataset.s)}
  else if(t.dataset.c){S.done[t.dataset.c]=!S.done[t.dataset.c];save();render()}
  else if(t.id==='tt'||t.id==='ted')timeSheet();
